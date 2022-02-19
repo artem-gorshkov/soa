@@ -5,6 +5,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.AssertTrue;
@@ -22,7 +23,7 @@ import java.util.List;
 public class MusicBand {
     @Id
     @Min(value = 1, message = "id must present and be greater than 0")
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id; //Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     @NotBlank(message = "name must present and be not blank")
     private String name; //Поле не может быть null, Строка не может быть пустой

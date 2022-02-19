@@ -6,6 +6,7 @@ import itmo.gorshkov.repository.MusicBandRepository;
 import itmo.gorshkov.repository.MusicBandRepositoryImpl;
 import itmo.gorshkov.util.CountByResult;
 
+import javax.persistence.EntityNotFoundException;
 import java.text.ParseException;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,13 +22,20 @@ public class MusicBandService {
         return musicBandRepository.findAll(filterConfiguration);
     }
 
-    public MusicBand saveOrUpdate(MusicBand musicBand) {
+    public MusicBand save(MusicBand musicBand) {
         if (musicBand.getId() == null || musicBandRepository.findById(musicBand.getId()) == null) {
             musicBandRepository.save(musicBand);
             return musicBand;
         } else {
-            return musicBandRepository.update(musicBand);
+            throw new IllegalArgumentException(musicBand.getId().toString());
         }
+    }
+
+    public MusicBand update(MusicBand musicBand) {
+        if (musicBand.getId() == null || musicBandRepository.findById(musicBand.getId()) == null) {
+            throw new EntityNotFoundException(musicBand.getId().toString());
+        }
+        return musicBandRepository.update(musicBand);
     }
 
     public MusicBand findById(Integer id) {
@@ -35,6 +43,9 @@ public class MusicBandService {
     }
 
     public void delete(Integer id) {
+        if (id == null || musicBandRepository.findById(id) == null) {
+            throw new EntityNotFoundException("" + id);
+        }
         musicBandRepository.delete(id);
     }
 
@@ -43,5 +54,4 @@ public class MusicBandService {
                 .map(row -> new CountByResult((int) row[0], (java.math.BigInteger) row[1]))
                 .collect(Collectors.toList());
     }
-    //TODO: Сгруппировать объекты по значению поля numberOfParticipants, вернуть количество элементов в каждой группе.
 }

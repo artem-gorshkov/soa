@@ -1,7 +1,6 @@
 package itmo.gorshkov.util;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import itmo.gorshkov.entity.MusicBand;
 import org.slf4j.Logger;
@@ -39,7 +38,7 @@ public class MusicBandValidator {
 
         processCreationDate(musicBand);
 
-        if (validIdInUpdateRequest(req, resp, musicBand)) {
+        if (validIdInRequest(req, resp, musicBand)) {
             return false;
         }
 
@@ -60,9 +59,13 @@ public class MusicBandValidator {
         return false;
     }
 
-    private boolean validIdInUpdateRequest(HttpServletRequest req, HttpServletResponse resp, MusicBand musicBand) throws IOException {
+    private boolean validIdInRequest(HttpServletRequest req, HttpServletResponse resp, MusicBand musicBand) throws IOException {
         if (req.getMethod().equals("PUT") && musicBand.getId() == null) {
             writeError(resp, SC_BAD_REQUEST, "id must present in request body");
+            return true;
+        }
+        if (req.getMethod().equals("POST") && musicBand.getId() != null) {
+            writeError(resp, SC_BAD_REQUEST, "id shouldn't present in request body");
             return true;
         }
         return false;
@@ -78,6 +81,10 @@ public class MusicBandValidator {
         MusicBand musicBand = null;
         try {
             String jsonString = req.getReader().lines().collect(Collectors.joining(System.lineSeparator()));
+            if (jsonString.isEmpty()) {
+                writeError(resp, SC_BAD_REQUEST, "Empty string, model expected");
+            }
+
             musicBand = gson.fromJson(jsonString, MusicBand.class);
         } catch (JsonSyntaxException e) {
             writeError(resp, SC_BAD_REQUEST, "Invalid JSON in request body");

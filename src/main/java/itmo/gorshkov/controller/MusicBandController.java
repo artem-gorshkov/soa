@@ -1,7 +1,6 @@
 package itmo.gorshkov.controller;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import itmo.gorshkov.config.FilterConfiguration;
 import itmo.gorshkov.entity.MusicBand;
 import itmo.gorshkov.repository.MusicBandRepositoryImpl;
@@ -10,6 +9,7 @@ import itmo.gorshkov.util.CustomGsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.persistence.EntityNotFoundException;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -19,6 +19,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.ParseException;
 import java.util.List;
+
+import static itmo.gorshkov.util.WriteErrorUtil.writeError;
+import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
+import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
 
 @WebServlet("/api/band/*")
 public class MusicBandController extends HttpServlet {
@@ -48,7 +52,7 @@ public class MusicBandController extends HttpServlet {
             if (band != null) {
                 writer.write(gson.toJson(band));
             } else {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                resp.setStatus(SC_NOT_FOUND);
             }
 
         } else {
@@ -78,7 +82,7 @@ public class MusicBandController extends HttpServlet {
             if (bands != null) {
                 writer.write(gson.toJson(bands));
             } else {
-                resp.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                resp.setStatus(SC_NOT_FOUND);
             }
         }
     }
@@ -91,9 +95,14 @@ public class MusicBandController extends HttpServlet {
 
         MusicBand band = (MusicBand) req.getAttribute("band");
 
-        MusicBand savedValue = musicBandService.saveOrUpdate(band);
-        resp.setStatus(HttpServletResponse.SC_CREATED);
-        writer.write(gson.toJson(savedValue));
+        MusicBand savedValue = null;
+        try {
+            savedValue = musicBandService.save(band);
+            resp.setStatus(HttpServletResponse.SC_CREATED);
+            writer.write(gson.toJson(savedValue));
+        } catch (IllegalArgumentException e) {
+            writeError(resp, SC_BAD_REQUEST, "Entity with " + e.getMessage() + " already exist");
+        }
     }
 
     @Override
@@ -104,7 +113,11 @@ public class MusicBandController extends HttpServlet {
 
         MusicBand band = (MusicBand) req.getAttribute("band");
 
-        writer.write(gson.toJson(musicBandService.saveOrUpdate(band)));
+        try {
+            writer.write(gson.toJson(musicBandService.update(band)));
+        } catch (EntityNotFoundException e) {
+            writeError(resp, SC_NOT_FOUND, "Entity with " + e.getMessage() + " not found");
+        }
     }
 
     @Override
@@ -112,6 +125,10 @@ public class MusicBandController extends HttpServlet {
         resp.setContentType("application/json");
 
         Integer id = (Integer) req.getAttribute("id");
-        musicBandService.delete(id);
+        try {
+            musicBandService.delete(id);
+        } catch (EntityNotFoundException e) {
+            writeError(resp, SC_NOT_FOUND, "Entity with " + e.getMessage() + " not found");
+        }
     }
 }

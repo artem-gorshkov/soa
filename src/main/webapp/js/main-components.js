@@ -444,6 +444,8 @@ Vue.component(
                         <input id="filterByGenrePOP" type="radio" value="POP" v-model="filterByGenre" name="filterByGenre">
                         <label for="filterByGenrePOST_PUNK" class="pl-5">POST_PUNK</label>
                         <input id="filterByGenrePOST_PUNK" type="radio" value="POST_PUNK" v-model="filterByGenre" name="filterByGenre">
+                        <label for="filterByGenreNONE" class="pl-5">None</label>
+                        <input id="filterByGenreNONE" type="radio" value="" v-model="filterByGenre" name="filterByGenre">
                     </div>
                     <div>
                         <label for="filterByLabelName">Label Name</label>
@@ -586,7 +588,7 @@ Vue.component(
                 </div>
                 <div>
                     <label for="labelName">Label Name</label>
-                    <input id="labelName" type="text" maxlength="8" v-model="labelName">
+                    <input id="labelName" type="text" maxlength="256" v-model="labelName">
                 </div>
                 
                 <button v-if="id" class="btn btn-info" v-on:click="addBand()" type="submit">Update</button>
