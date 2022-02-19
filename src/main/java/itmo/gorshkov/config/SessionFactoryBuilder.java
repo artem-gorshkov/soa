@@ -22,9 +22,9 @@ public class SessionFactoryBuilder {
 
         properties.put(Environment.DRIVER, "org.postgresql.Driver");
         properties.put(Environment.CURRENT_SESSION_CONTEXT_CLASS, "thread");
-        properties.put(Environment.URL, "jdbc:postgresql://localhost:5432/soa");
-        properties.put(Environment.USER, "postgres");
-        properties.put(Environment.PASS, "postgres");
+        properties.put(Environment.URL, System.getenv("DATABASE_URL"));
+        properties.put(Environment.USER, System.getenv("DATABASE_USER"));
+        properties.put(Environment.PASS, System.getenv("DATABASE_PASSWORD"));
         properties.put(Environment.DIALECT, "org.hibernate.dialect.PostgreSQL9Dialect");
         properties.put(Environment.FORMAT_SQL, true);
         properties.put(Environment.SHOW_SQL, true);
