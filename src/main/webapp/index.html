@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="utf-8" />
+    <title>Сервис-ориентированная архитектура, лабораторная работа #1</title>
+    <link rel="shortcut icon" href="img/favicon.ico">
+    <link rel="stylesheet" type="text/css" href="css/thirdparty/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/thirdparty/bootstrap-table.min.css">
+</head>
+
+<body>
+<div id="app" class="pl-5 pr-5">
+    <filters v-on:filter="filter"></filters>
+    <result-table v-bind:bands="bands" v-on:deleteband="deleteBand" v-on:editband="editBand"></result-table>
+    <div class="col-xs-1 text-center" id="error"></div>
+    <add-band v-on:addband="addBand" ref="mainform"></add-band>
+    <additional-actions v-on:calcavrg="calcAvrg" v-bind:groupby="groupby"></additional-actions>
+</div>
+
+<script src="https://unpkg.com/vue@2.6.14"></script>
+<script src="https://unpkg.com/vue-resource"></script>
+<script src="js/main-components.js"></script>
+<script src="https://momentjs.com/downloads/moment-with-locales.min.js"></script>
+
+<script>
+    function printError(message) {
+        document.getElementById("error").innerText = message
+    }
+    var app = new Vue({
+        el: '#app',
+        data: {
+            bands: [],
+            groupby: []
+        },
+        methods: {
+            filter: function(filterInfo) {
+                let params = []
+
+                if (filterInfo.elementsCount) {
+                    params.push('count=' + filterInfo.elementsCount)
+
+                    if (filterInfo.pageNumber) {
+                        params.push('page=' + filterInfo.pageNumber)
+                    }
+                }
+
+                console.log(filterInfo.orderBy1)
+                console.log(filterInfo.orderDirection1)
+
+                if (filterInfo.orderBy1 && filterInfo.orderDirection1) {
+                    params.push('order=' + filterInfo.orderBy1 + ',' + filterInfo.orderDirection1)
+                }
+                if (filterInfo.orderBy2 && filterInfo.orderDirection2) {
+                    params.push('order=' + filterInfo.orderBy2 + ',' + filterInfo.orderDirection2)
+                }
+                if (filterInfo.orderBy3 && filterInfo.orderDirection3) {
+                    params.push('order=' + filterInfo.orderBy3 + ',' + filterInfo.orderDirection3)
+                }
+                if (filterInfo.orderBy4 && filterInfo.orderDirection4) {
+                    params.push('order=' + filterInfo.orderBy4 + ',' + filterInfo.orderDirection4)
+                }
+                if (filterInfo.orderBy5 && filterInfo.orderDirection5) {
+                    params.push('order=' + filterInfo.orderBy5 + ',' + filterInfo.orderDirection5)
+                }
+                if (filterInfo.orderBy6 && filterInfo.orderDirection6) {
+                    params.push('order=' + filterInfo.orderBy6 + ',' + filterInfo.orderDirection6)
+                }
+                if (filterInfo.orderBy7 && filterInfo.orderDirection7) {
+                    params.push('order=' + filterInfo.orderBy7 + ',' + filterInfo.orderDirection7)
+                }
+                if (filterInfo.orderBy8 && filterInfo.orderDirection8) {
+                    params.push('order=' + filterInfo.orderBy8 + ',' + filterInfo.orderDirection8)
+                }
+                if (filterInfo.orderBy9 && filterInfo.orderDirection9) {
+                    params.push('order=' + filterInfo.orderBy9 + ',' + filterInfo.orderDirection9)
+                }
+
+                if (filterInfo.filterById) {
+                    params.push('filter=id,==,' + filterInfo.filterById)
+                }
+                if (filterInfo.filterByName) {
+                    params.push('filter=name,contains,' + filterInfo.filterByName)
+                }
+                if (filterInfo.filterByX && filterInfo.filterByXAction) {
+                    params.push('filter=x,' + filterInfo.filterByXAction + ',' + filterInfo.filterByX)
+                }
+                if (filterInfo.filterByY && filterInfo.filterByYAction) {
+                    params.push('filter=y,' + filterInfo.filterByYAction + ',' + filterInfo.filterByY)
+                }
+                if (filterInfo.filterByCreationDate && filterInfo.filterByCreationDateAction) {
+                    params.push('filter=creationDate,' + filterInfo.filterByCreationDateAction + ',' + filterInfo.filterByCreationDate)
+                }
+                if (filterInfo.filterByNumberOfParticipants && filterInfo.filterByNumberOfParticipantsAction) {
+                    params.push('filter=numberOfParticipants,' + filterInfo.filterByNumberOfParticipantsAction + ',' + filterInfo.filterByNumberOfParticipants)
+                }
+                if (filterInfo.filterByAlbumsCount && filterInfo.filterByAlbumsCountAction) {
+                    params.push('filter=albumsCount,' + filterInfo.filterByAlbumsCountAction + ',' + filterInfo.filterByAlbumsCount)
+                }
+                if (filterInfo.filterByGenre) {
+                    params.push('filter=genre,==,' + filterInfo.filterByGenre)
+                }
+                if (filterInfo.labelName) {
+                    params.push('filter=labelName,contains,' + filterInfo.filterByLabelName)
+                }
+
+                params = params.join('&')
+
+                this.$http.get(
+                    '/api/band?' + params
+                ).then(
+                    (response) => {
+                        this.bands = response.body;
+                    },
+                    (error) => {
+                        printError(error.body.message)
+                    }
+                );
+            },
+            deleteBand: function (band) {
+                this.$http.delete(
+                    '/api/band/' + band.id
+                ).then(
+                    (response) => {
+                        this.bands.splice(this.bands.indexOf(band), 1);
+                    },
+                    (error) => {
+                        printError(error.body.message)
+                    }
+                );
+            },
+            addBand: function (band) {
+                if (band.id) {
+                    this.$http.put(
+                        '/api/band',
+                        band
+                    ).then(
+                        (response) => {
+                            for (let i in this.bands) {
+                                if (band.id === this.bands[i].id) {
+                                    this.bands.splice(i, 1);
+                                    break
+                                }
+                            }
+                            this.bands.push(response.body);
+                        },
+                        (error) => {
+                            printError(error.body.message)
+                        }
+                    );
+                } else {
+                    this.$http.post(
+                        '/api/band',
+                        band
+                    ).then(
+                        (response) => {
+                            this.bands.push(response.body);
+                        },
+                        (error) => {
+                            printError(error.body.message)
+                        }
+                    );
+                }
+            },
+            editBand: function (band) {
+                this.$refs.mainform.$el.scrollIntoView({ behavior: 'smooth' });
+                this.$refs.mainform.updateFields(band);
+            },
+            calcAvrg: function () {
+                this.$http.get(
+                    '/api/band/count_by/number_of_participants',
+                ).then(
+                    (response) => {
+                        this.groupby = response.body
+                    },
+                    (error) => {
+                        printError(error.body.message)
+                    }
+                );
+            }
+        },
+        created: function() {
+            this.$http.get(
+                '/api/band',
+                {
+                }
+            ).then(
+                (response) => {
+                    this.bands = response.body;
+                },
+                (error) => {
+                    printError(error.body.message)
+                }
+            );
+        }
+    })
+</script>
+</body>
+
+</html>
