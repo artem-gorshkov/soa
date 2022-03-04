@@ -16,7 +16,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -95,7 +94,7 @@ public class MusicBandRepositoryImpl implements MusicBandRepository {
     }
 
     @Override
-    public List<MusicBand> findAll(FilterConfiguration filterConfiguration) throws ParseException {
+    public List<MusicBand> findAll(FilterConfiguration filterConfiguration) {
         Session session = sessionFactory.openSession();
 
         CriteriaBuilder criteriaBuilder = session.getCriteriaBuilder();
@@ -134,7 +133,7 @@ public class MusicBandRepositoryImpl implements MusicBandRepository {
         }
     }
 
-    private void filterQuery(FilterConfiguration filterConfiguration, CriteriaBuilder criteriaBuilder, CriteriaQuery<MusicBand> criteria, Root<MusicBand> root) throws ParseException {
+    private void filterQuery(FilterConfiguration filterConfiguration, CriteriaBuilder criteriaBuilder, CriteriaQuery<MusicBand> criteria, Root<MusicBand> root) {
         if (filterConfiguration.getFilter() != null) {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -171,7 +170,7 @@ public class MusicBandRepositoryImpl implements MusicBandRepository {
         }
     }
 
-    private void greaterFilter(CriteriaBuilder criteriaBuilder, Root<MusicBand> root, List<Predicate> predicates, String[] parts) throws ParseException {
+    private void greaterFilter(CriteriaBuilder criteriaBuilder, Root<MusicBand> root, List<Predicate> predicates, String[] parts) {
         if (parts[0].equals("creationDate")) {
             predicates.add(criteriaBuilder.greaterThan(root.get(parts[0]), LocalDate.parse(parts[2])));
         } else {
@@ -179,7 +178,7 @@ public class MusicBandRepositoryImpl implements MusicBandRepository {
         }
     }
 
-    private void lessFilter(CriteriaBuilder criteriaBuilder, Root<MusicBand> root, List<Predicate> predicates, String[] parts) throws ParseException {
+    private void lessFilter(CriteriaBuilder criteriaBuilder, Root<MusicBand> root, List<Predicate> predicates, String[] parts) {
         if (parts[0].equals("creationDate")) {
             predicates.add(criteriaBuilder.lessThan(root.get(parts[0]), LocalDate.parse(parts[2])));
         } else {
@@ -187,7 +186,7 @@ public class MusicBandRepositoryImpl implements MusicBandRepository {
         }
     }
 
-    private void greaterOrEqualFilter(CriteriaBuilder criteriaBuilder, Root<MusicBand> root, List<Predicate> predicates, String[] parts) throws ParseException {
+    private void greaterOrEqualFilter(CriteriaBuilder criteriaBuilder, Root<MusicBand> root, List<Predicate> predicates, String[] parts) {
         if (parts[0].equals("creationDate")) {
             predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get(parts[0]), LocalDate.parse(parts[2])));
         } else {
@@ -195,7 +194,7 @@ public class MusicBandRepositoryImpl implements MusicBandRepository {
         }
     }
 
-    private void lessOrEqualFilter(CriteriaBuilder criteriaBuilder, Root<MusicBand> root, List<Predicate> predicates, String[] parts) throws ParseException {
+    private void lessOrEqualFilter(CriteriaBuilder criteriaBuilder, Root<MusicBand> root, List<Predicate> predicates, String[] parts) {
         if (parts[0].equals("creationDate")) {
             predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get(parts[0]), LocalDate.parse(parts[2])));
         } else {
@@ -203,7 +202,7 @@ public class MusicBandRepositoryImpl implements MusicBandRepository {
         }
     }
 
-    private void equalFilter(CriteriaBuilder criteriaBuilder, Root<MusicBand> root, List<Predicate> predicates, String[] parts) throws ParseException {
+    private void equalFilter(CriteriaBuilder criteriaBuilder, Root<MusicBand> root, List<Predicate> predicates, String[] parts) {
         if (parts[0].equals("creationDate")) {
             predicates.add(criteriaBuilder.equal(root.<Date>get(parts[0]), LocalDate.parse(parts[2])));
         } else if (parts[0].equals("genre")) {

@@ -1,134 +1,126 @@
 package itmo.gorshkov.controller;
 
-import com.google.gson.Gson;
 import itmo.gorshkov.config.FilterConfiguration;
 import itmo.gorshkov.entity.MusicBand;
 import itmo.gorshkov.repository.MusicBandRepositoryImpl;
 import itmo.gorshkov.service.MusicBandService;
-import itmo.gorshkov.util.CustomGsonBuilder;
+import itmo.gorshkov.validator.MusicBandValidator;
+import itmo.gorshkov.validator.OptionValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityNotFoundException;
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.text.ParseException;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
+import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.Response;
 import java.util.List;
 
-import static itmo.gorshkov.util.WriteErrorUtil.writeError;
-import static javax.servlet.http.HttpServletResponse.SC_BAD_REQUEST;
-import static javax.servlet.http.HttpServletResponse.SC_NOT_FOUND;
+import static itmo.gorshkov.util.ResponseUtil.errorResponse;
 
-@WebServlet("/api/band/*")
-public class MusicBandController extends HttpServlet {
-    private final MusicBandService musicBandService;
-    private final Gson gson;
-
-    public static Logger logger = LoggerFactory.getLogger(MusicBandRepositoryImpl.class);
+@Path("/band")
+@Consumes({ "application/json" })
+@Produces({ "application/json" })
+public class MusicBandController {
+    private final MusicBandService bandService;
+    private final MusicBandValidator bandValidator;
+    private final OptionValidator optionValidator;
 
     public MusicBandController() {
-        this.gson = CustomGsonBuilder.create();
-        this.musicBandService = new MusicBandService();
+        this.bandService = new MusicBandService();
+        this.bandValidator = new MusicBandValidator();
+        this.optionValidator = new OptionValidator();
     }
 
-    @Override
-    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("application/json");
+    @GET
+    @Path("/{id}")
+    public Response getBand(@PathParam("id") Integer id) {
+        MusicBand band = bandService.findById(id);
 
-        PrintWriter writer = resp.getWriter();
-
-        Integer id = (Integer) req.getAttribute("id");
-
-        if (req.getPathInfo() != null && req.getPathInfo().equals("/count_by/number_of_participants")) {
-            writer.write(gson.toJson(musicBandService.countByNumberOfParticipants()));
-        } else if (id != null) {
-            MusicBand band = musicBandService.findById(id);
-
-            if (band != null) {
-                writer.write(gson.toJson(band));
-            } else {
-                resp.setStatus(SC_NOT_FOUND);
-            }
-
+        if (band != null) {
+            return Response.status(HttpServletResponse.SC_OK).entity(band).build();
         } else {
-            FilterConfiguration filterConfiguration = new FilterConfiguration();
-            if (req.getAttribute("count") != null && req.getAttribute("page") != null) {
-                filterConfiguration.setCount((int) req.getAttribute("count"));
-                filterConfiguration.setPage((int) req.getAttribute("page"));
-                logger.info("count: {}, page: {}", filterConfiguration.getCount(), filterConfiguration.getPage());
-            }
-
-            if (req.getParameter("order") != null) {
-                filterConfiguration.setOrder(req.getParameterValues("order"));
-            }
-
-            if (req.getParameter("filter") != null) {
-                filterConfiguration.setFilter(req.getParameterValues("filter"));
-            }
-
-            List<MusicBand> bands = null;
-            try {
-                bands = musicBandService.findAll(filterConfiguration);
-            } catch (ParseException e) {
-                resp.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-                logger.error(e.getMessage(), e);
-            }
-
-            if (bands != null) {
-                writer.write(gson.toJson(bands));
-            } else {
-                resp.setStatus(SC_NOT_FOUND);
-            }
+            return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
         }
     }
 
-    @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("application/json");
+    @GET
+    @Path("")
+    public Response getBands(@QueryParam("count") Integer count, @QueryParam("page") Integer page,
+                              @QueryParam("order") List<String> order, @QueryParam("filter") List<String> filter) {
+        FilterConfiguration filterConfiguration = createFilter(count, page, order, filter);
 
-        PrintWriter writer = resp.getWriter();
+        optionValidator.validate(filterConfiguration);
 
-        MusicBand band = (MusicBand) req.getAttribute("band");
+        List<MusicBand> bands = bandService.findAll(filterConfiguration);
 
-        MusicBand savedValue = null;
-        try {
-            savedValue = musicBandService.save(band);
-            resp.setStatus(HttpServletResponse.SC_CREATED);
-            writer.write(gson.toJson(savedValue));
-        } catch (IllegalArgumentException e) {
-            writeError(resp, SC_BAD_REQUEST, "Entity with " + e.getMessage() + " already exist");
+        if (bands.size() > 0) {
+            return Response.status(HttpServletResponse.SC_OK).entity(bands).build();
+        } else {
+            return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
         }
     }
 
-    @Override
-    protected void doPut(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("application/json");
-
-        PrintWriter writer = resp.getWriter();
-
-        MusicBand band = (MusicBand) req.getAttribute("band");
-
-        try {
-            writer.write(gson.toJson(musicBandService.update(band)));
-        } catch (EntityNotFoundException e) {
-            writeError(resp, SC_NOT_FOUND, "Entity with " + e.getMessage() + " not found");
+    @POST
+    @Path("")
+    public Response addBand(MusicBand band) {
+        if (band.getId() != null) {
+            throw new BadRequestException(errorResponse("id shouldn't present in request body"));
         }
+
+        bandValidator.validate(band);
+
+        MusicBand savedValue = bandService.save(band);
+        return Response.status(HttpServletResponse.SC_CREATED).entity(savedValue).build();
     }
 
-    @Override
-    protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        resp.setContentType("application/json");
-
-        Integer id = (Integer) req.getAttribute("id");
-        try {
-            musicBandService.delete(id);
-        } catch (EntityNotFoundException e) {
-            writeError(resp, SC_NOT_FOUND, "Entity with " + e.getMessage() + " not found");
+    @PUT
+    @Path("")
+    public Response putBand(MusicBand band) {
+        if (band.getId() == null) {
+            throw new BadRequestException(errorResponse("id must present in request body"));
         }
+
+        bandValidator.validate(band);
+
+        MusicBand savedValue = bandService.update(band);
+        return Response.status(HttpServletResponse.SC_OK).entity(savedValue).build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response deleteBand(@PathParam("id") Integer id) {
+        bandService.delete(id);
+        return Response.status(HttpServletResponse.SC_OK).build();
+    }
+
+    @GET
+    @Path("/count_by/number_of_participants")
+    public Response getGoldenPalmCount() {
+        return Response.status(HttpServletResponse.SC_OK).entity(bandService.countByNumberOfParticipants()).build();
+    }
+
+    private FilterConfiguration createFilter(Integer count, Integer page, List<String> order, List<String> filter) {
+        FilterConfiguration filterConfiguration = new FilterConfiguration();
+        if (count != null && page != null) {
+            filterConfiguration.setCount(count);
+            filterConfiguration.setPage(page);
+        }
+
+        if (order != null && order.size() > 0) {
+            filterConfiguration.setOrder(order);
+        }
+
+        if (filter != null && filter.size() > 0) {
+            filterConfiguration.setFilter(filter);
+        }
+        return filterConfiguration;
     }
 }

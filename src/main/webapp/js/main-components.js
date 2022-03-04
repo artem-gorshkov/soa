@@ -46,7 +46,7 @@ Vue.component(
                 this.$emit('deleteband', band);
             },
             formatCreationDate: function (band) {
-                return moment(band.creationDate, 'lll').format('YYYY-MM-DD');
+                return moment(band.creationDate).format('YYYY-MM-DD');
             }
         }
     }
@@ -635,7 +635,7 @@ Vue.component(
                 this.name = band.name
                 this.x = band.x
                 this.y = band.y
-                this.creationDate = moment(band.creationDate, 'lll').format('YYYY-MM-DD')
+                this.creationDate = moment(band.creationDate).format('YYYY-MM-DD')
                 this.numberOfParticipants = band.numberOfParticipants
                 this.albumsCount = band.albumsCount
                 this.genre = band.genre

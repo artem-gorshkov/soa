@@ -113,6 +113,10 @@
                         this.bands = response.body;
                     },
                     (error) => {
+                        if (error.status === 404) {
+                            this.bands = []
+                        }
+
                         printError(error.body.message)
                     }
                 );
