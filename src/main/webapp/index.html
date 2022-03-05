@@ -107,7 +107,7 @@
                 params = params.join('&')
 
                 this.$http.get(
-                    '/api/band?' + params
+                    '/v1/api/band?' + params
                 ).then(
                     (response) => {
                         this.bands = response.body;
@@ -117,26 +117,26 @@
                             this.bands = []
                         }
 
-                        printError(error.body.message)
+                        printError(error.bodyText)
                     }
                 );
             },
             deleteBand: function (band) {
                 this.$http.delete(
-                    '/api/band/' + band.id
+                    '/v1/api/band/' + band.id
                 ).then(
                     (response) => {
                         this.bands.splice(this.bands.indexOf(band), 1);
                     },
                     (error) => {
-                        printError(error.body.message)
+                        printError(error.bodyText)
                     }
                 );
             },
             addBand: function (band) {
                 if (band.id) {
                     this.$http.put(
-                        '/api/band',
+                        '/v1/api/band',
                         band
                     ).then(
                         (response) => {
@@ -149,19 +149,19 @@
                             this.bands.push(response.body);
                         },
                         (error) => {
-                            printError(error.body.message)
+                            printError(error.bodyText)
                         }
                     );
                 } else {
                     this.$http.post(
-                        '/api/band',
+                        '/v1/api/band',
                         band
                     ).then(
                         (response) => {
                             this.bands.push(response.body);
                         },
                         (error) => {
-                            printError(error.body.message)
+                            printError(error.bodyText)
                         }
                     );
                 }
@@ -172,20 +172,20 @@
             },
             calcAvrg: function () {
                 this.$http.get(
-                    '/api/band/count_by/number_of_participants',
+                    '/v1/api/band/count_by/number_of_participants',
                 ).then(
                     (response) => {
                         this.groupby = response.body
                     },
                     (error) => {
-                        printError(error.body.message)
+                        printError(error.bodyText)
                     }
                 );
             }
         },
         created: function() {
             this.$http.get(
-                '/api/band',
+                '/v1/api/band',
                 {
                 }
             ).then(
@@ -193,7 +193,7 @@
                     this.bands = response.body;
                 },
                 (error) => {
-                    printError(error.body.message)
+                    printError(error.bodyText)
                 }
             );
         }

@@ -2,12 +2,9 @@ package itmo.gorshkov.controller;
 
 import itmo.gorshkov.config.FilterConfiguration;
 import itmo.gorshkov.entity.MusicBand;
-import itmo.gorshkov.repository.MusicBandRepositoryImpl;
 import itmo.gorshkov.service.MusicBandService;
 import itmo.gorshkov.validator.MusicBandValidator;
 import itmo.gorshkov.validator.OptionValidator;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.BadRequestException;
@@ -40,18 +37,6 @@ public class MusicBandController {
     }
 
     @GET
-    @Path("/{id}")
-    public Response getBand(@PathParam("id") Integer id) {
-        MusicBand band = bandService.findById(id);
-
-        if (band != null) {
-            return Response.status(HttpServletResponse.SC_OK).entity(band).build();
-        } else {
-            return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
-        }
-    }
-
-    @GET
     @Path("")
     public Response getBands(@QueryParam("count") Integer count, @QueryParam("page") Integer page,
                               @QueryParam("order") List<String> order, @QueryParam("filter") List<String> filter) {
@@ -68,14 +53,28 @@ public class MusicBandController {
         }
     }
 
+    @GET
+    @Path("/{id}")
+    public Response getBand(@PathParam("id") Integer id) {
+        MusicBand band = bandService.findById(id);
+
+        if (band != null) {
+            return Response.status(HttpServletResponse.SC_OK).entity(band).build();
+        } else {
+            return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
+        }
+    }
+
     @POST
     @Path("")
-    public Response addBand(MusicBand band) {
+    public Response addBand(String json) {
+        MusicBand band = bandValidator.validate(json);
+
         if (band.getId() != null) {
             throw new BadRequestException(errorResponse("id shouldn't present in request body"));
         }
 
-        bandValidator.validate(band);
+
 
         MusicBand savedValue = bandService.save(band);
         return Response.status(HttpServletResponse.SC_CREATED).entity(savedValue).build();
@@ -83,12 +82,13 @@ public class MusicBandController {
 
     @PUT
     @Path("")
-    public Response putBand(MusicBand band) {
+    public Response putBand(String json) {
+        MusicBand band = bandValidator.validate(json);
+
         if (band.getId() == null) {
             throw new BadRequestException(errorResponse("id must present in request body"));
         }
 
-        bandValidator.validate(band);
 
         MusicBand savedValue = bandService.update(band);
         return Response.status(HttpServletResponse.SC_OK).entity(savedValue).build();
