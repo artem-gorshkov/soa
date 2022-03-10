@@ -15,7 +15,6 @@ import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
 import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
-import java.io.IOException;
 import java.time.format.DateTimeParseException;
 import java.util.Set;
 

@@ -1,7 +1,6 @@
 package itmo.gorshkov.repository;
 
 
-import itmo.gorshkov.entity.Coordinates;
 import itmo.gorshkov.entity.Label;
 
 import java.util.List;

@@ -1,5 +1,6 @@
 package itmo.gorshkov.controller;
 
+import itmo.gorshkov.ContextProvider;
 import itmo.gorshkov.config.FilterConfiguration;
 import itmo.gorshkov.entity.MusicBand;
 import itmo.gorshkov.service.MusicBandService;
@@ -31,7 +32,8 @@ public class MusicBandController {
     private final OptionValidator optionValidator;
 
     public MusicBandController() {
-        this.bandService = new MusicBandService();
+        ContextProvider contextProvider = new ContextProvider();
+        this.bandService = contextProvider.lookupMusicBandService();
         this.bandValidator = new MusicBandValidator();
         this.optionValidator = new OptionValidator();
     }

@@ -6,8 +6,13 @@
 
     <groupId>itmo.gorshkov</groupId>
     <artifactId>soa</artifactId>
-    <version>1.0</version>
-    <packaging>war</packaging>
+    <version>3.0</version>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>web</module>
+        <module>ejb</module>
+    </modules>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

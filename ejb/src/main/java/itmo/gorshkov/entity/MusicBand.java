@@ -12,6 +12,7 @@ import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -20,7 +21,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "MUSIC_BAND")
-public class MusicBand {
+public class MusicBand implements Serializable {
+    private static final long serialVersionUID = -2407173236798550497L;
     @Id
     @Min(value = 1, message = "id must present and be greater than 0")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
