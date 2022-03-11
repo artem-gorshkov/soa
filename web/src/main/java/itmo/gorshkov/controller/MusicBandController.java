@@ -1,9 +1,11 @@
 package itmo.gorshkov.controller;
 
+import com.google.gson.Gson;
 import itmo.gorshkov.ContextProvider;
 import itmo.gorshkov.config.FilterConfiguration;
 import itmo.gorshkov.entity.MusicBand;
 import itmo.gorshkov.service.MusicBandService;
+import itmo.gorshkov.util.CustomGsonBuilder;
 import itmo.gorshkov.validator.MusicBandValidator;
 import itmo.gorshkov.validator.OptionValidator;
 
@@ -30,6 +32,7 @@ public class MusicBandController {
     private final MusicBandService bandService;
     private final MusicBandValidator bandValidator;
     private final OptionValidator optionValidator;
+    private final Gson gson = CustomGsonBuilder.create();
 
     public MusicBandController() {
         ContextProvider contextProvider = new ContextProvider();
@@ -49,7 +52,7 @@ public class MusicBandController {
         List<MusicBand> bands = bandService.findAll(filterConfiguration);
 
         if (bands.size() > 0) {
-            return Response.status(HttpServletResponse.SC_OK).entity(bands).build();
+            return Response.status(HttpServletResponse.SC_OK).entity(gson.toJson(bands)).build();
         } else {
             return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
         }
@@ -61,7 +64,7 @@ public class MusicBandController {
         MusicBand band = bandService.findById(id);
 
         if (band != null) {
-            return Response.status(HttpServletResponse.SC_OK).entity(band).build();
+            return Response.status(HttpServletResponse.SC_OK).entity(gson.toJson(band)).build();
         } else {
             return Response.status(HttpServletResponse.SC_NOT_FOUND).build();
         }
@@ -76,10 +79,8 @@ public class MusicBandController {
             throw new BadRequestException(errorResponse("id shouldn't present in request body"));
         }
 
-
-
         MusicBand savedValue = bandService.save(band);
-        return Response.status(HttpServletResponse.SC_CREATED).entity(savedValue).build();
+        return Response.status(HttpServletResponse.SC_CREATED).entity(gson.toJson(savedValue)).build();
     }
 
     @PUT
@@ -91,9 +92,8 @@ public class MusicBandController {
             throw new BadRequestException(errorResponse("id must present in request body"));
         }
 
-
         MusicBand savedValue = bandService.update(band);
-        return Response.status(HttpServletResponse.SC_OK).entity(savedValue).build();
+        return Response.status(HttpServletResponse.SC_OK).entity(gson.toJson(savedValue)).build();
     }
 
     @DELETE
