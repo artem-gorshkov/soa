@@ -9,9 +9,9 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 @ApplicationPath("v1/api")
-public class JaxRsConfiguration extends Application {
+public class JaxWsConfiguration extends Application {
 
-    public JaxRsConfiguration() throws Exception {
+    public JaxWsConfiguration() throws Exception {
         super();
 
         Client client = ClientBuilder.newBuilder().build();
