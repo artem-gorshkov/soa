@@ -7,18 +7,13 @@ import itmo.gorshkov.util.CustomGsonBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.ValidationException;
 import javax.validation.Validator;
 import javax.validation.ValidatorFactory;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.core.Response;
 import java.time.format.DateTimeParseException;
 import java.util.Set;
-
-import static itmo.gorshkov.util.ResponseUtil.errorResponse;
 
 public class MusicBandValidator {
 
@@ -30,7 +25,7 @@ public class MusicBandValidator {
 
     public MusicBand validate(String json) {
         if (json == null) {
-            throw new BadRequestException(Response.status(HttpServletResponse.SC_BAD_REQUEST).entity("Request body must be specified").build());
+            throw new RuntimeException("Request body must be specified");
         }
 
         MusicBand musicBand = parse(json);
@@ -46,23 +41,23 @@ public class MusicBandValidator {
             errorMessage.append(violation.getMessage()).append(" \n ");
         }
 
-        throw new BadRequestException(errorResponse(errorMessage.toString()));
+        throw new RuntimeException(errorMessage.toString());
     }
 
     private MusicBand parse(String jsonString){
         MusicBand musicBand = null;
         try {
             if (jsonString.isEmpty()) {
-                throw new BadRequestException(errorResponse("Empty string, model expected"));
+                throw new RuntimeException("Empty string, model expected");
             }
 
             musicBand = gson.fromJson(jsonString, MusicBand.class);
         } catch (JsonSyntaxException e) {
-            throw new BadRequestException(errorResponse("Invalid JSON in request body"));
+            throw new RuntimeException("Invalid JSON in request body");
         } catch (DateTimeParseException e) {
-            throw new BadRequestException(errorResponse("Creation Date should be 'YYYY-MM-DD'"));
+            throw new RuntimeException("Creation Date should be 'YYYY-MM-DD'");
         } catch (ValidationException e) {
-            throw new BadRequestException(errorResponse(e.getMessage()));
+            throw new RuntimeException(e.getMessage());
         }
         return musicBand;
     }

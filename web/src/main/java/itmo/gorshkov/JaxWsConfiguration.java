@@ -21,7 +21,7 @@ public class JaxWsConfiguration extends Application {
         configuration.setId("l1");
         configuration.setName("LAB1");
         configuration.setAddress("localhost");
-        configuration.setPort(9443);
+        configuration.setPort(8082);
 
         Response response = client
                 .target(sdUrl + "/v1/agent/service/register")

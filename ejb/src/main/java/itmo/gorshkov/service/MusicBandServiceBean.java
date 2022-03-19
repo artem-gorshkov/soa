@@ -7,9 +7,6 @@ import itmo.gorshkov.repository.MusicBandRepositoryImpl;
 import itmo.gorshkov.util.CountByResult;
 
 import javax.ejb.Stateless;
-import javax.servlet.http.HttpServletResponse;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.core.Response;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -34,7 +31,7 @@ public class MusicBandServiceBean implements MusicBandService {
             musicBandRepository.save(musicBand);
             return musicBand;
         } else {
-            throw new NotFoundException(Response.status(HttpServletResponse.SC_NOT_FOUND).entity("is shouldn't present").build());
+            throw new RuntimeException("is shouldn't present");
         }
     }
 
@@ -72,7 +69,7 @@ public class MusicBandServiceBean implements MusicBandService {
 
     private void isIdExist(Integer id) {
         if (id == null || musicBandRepository.findById(id) == null) {
-            throw new NotFoundException(Response.status(HttpServletResponse.SC_NOT_FOUND).entity(id + " not found").build());
+            throw new RuntimeException(id + " not found");
         }
     }
 }

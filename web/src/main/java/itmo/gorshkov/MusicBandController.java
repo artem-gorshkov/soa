@@ -14,12 +14,8 @@ import javax.jws.WebMethod;
 import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.NotFoundException;
 import java.util.Arrays;
 import java.util.List;
-
-import static itmo.gorshkov.util.ResponseUtil.errorResponse;
 
 @Stateless
 @WebService(
@@ -50,7 +46,7 @@ public class MusicBandController {
         if (bands.size() > 0) {
             return bands;
         } else {
-            throw new NotFoundException();
+            throw new RuntimeException("not found bands");
         }
     }
 
@@ -61,7 +57,7 @@ public class MusicBandController {
         if (band != null) {
             return band;
         } else {
-            throw new NotFoundException();
+            throw new RuntimeException("band not found");
         }
     }
 
@@ -70,7 +66,7 @@ public class MusicBandController {
         MusicBand band = bandValidator.validate(json);
 
         if (band.getId() != null) {
-            throw new BadRequestException(errorResponse("id shouldn't present in request body"));
+            throw new RuntimeException("id shouldn't present in request body");
         }
 
         return bandService.save(band);
@@ -81,15 +77,16 @@ public class MusicBandController {
         MusicBand band = bandValidator.validate(json);
 
         if (band.getId() == null) {
-            throw new BadRequestException(errorResponse("id must present in request body"));
+            throw new RuntimeException("id must present in request body");
         }
 
         return bandService.update(band);
     }
 
     @WebMethod
-    public void deleteBand(@WebParam(name = "deleteId") Integer id) {
+    public Integer deleteBand(@WebParam(name = "deleteId") Integer id) {
         bandService.delete(id);
+        return id;
     }
 
     @WebMethod
@@ -99,17 +96,17 @@ public class MusicBandController {
 
     private FilterConfiguration createFilter(Filter filter) {
         FilterConfiguration filterConfiguration = new FilterConfiguration();
-        if (filter.getCount() != null && filter.getPage() != null) {
+        if (filter.getCount() != null && filter.getPage() != null && filter.getCount() != 0 && filter.getPage() != 0) {
             filterConfiguration.setCount(filter.getCount());
             filterConfiguration.setPage(filter.getPage());
         }
 
-        if (filter.getOrder() != null && filter.getOrder().length > 0) {
-            filterConfiguration.setOrder(Arrays.asList(filter.getOrder()));
+        if (filter.getOrder() != null && !filter.getOrder().isEmpty()) {
+            filterConfiguration.setOrder(Arrays.asList(filter.getOrder().split(";")));
         }
 
-        if (filter.getFilter() != null && filter.getFilter().length > 0) {
-            filterConfiguration.setFilter(Arrays.asList(filter.getFilter()));
+        if (filter.getFilter() != null && !filter.getFilter().isEmpty()) {
+            filterConfiguration.setFilter(Arrays.asList(filter.getFilter().split(";")));
         }
         return filterConfiguration;
     }

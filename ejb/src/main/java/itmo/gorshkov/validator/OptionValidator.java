@@ -4,7 +4,6 @@ import itmo.gorshkov.config.FilterConfiguration;
 import itmo.gorshkov.entity.MusicBand;
 import itmo.gorshkov.entity.MusicGenre;
 
-import javax.ws.rs.BadRequestException;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.text.ParseException;
@@ -15,7 +14,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static itmo.gorshkov.entity.MusicBand.getMusicBandFieldNames;
-import static itmo.gorshkov.util.ResponseUtil.errorResponse;
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.parseLong;
 
@@ -31,11 +29,11 @@ public class OptionValidator {
 
     private void processCount(FilterConfiguration filterConfiguration) {
         if (filterConfiguration.getCount() != null && !(filterConfiguration.getCount() > 0)) {
-            throw new BadRequestException(errorResponse("Parameter 'count' must be bigger than 0"));
+            throw new RuntimeException("Parameter 'count' must be bigger than 0");
         }
 
         if (filterConfiguration.getPage() != null && !(filterConfiguration.getPage() > 0)) {
-            throw new BadRequestException(errorResponse("Parameter 'page' must be bigger than 0"));
+            throw new RuntimeException("Parameter 'page' must be bigger than 0");
         }
     }
 
@@ -45,13 +43,13 @@ public class OptionValidator {
                 String[] parts = order.split(",");
                 if (parts.length == 2) {
                     if (!EXPECTED_FIELDS.contains(parts[0])) {
-                        throw new BadRequestException(errorResponse("Unexpected field '" + parts[0] + "' specified to order by '" + order + "'. Check documentation for details."));
+                        throw new RuntimeException("Unexpected field '" + parts[0] + "' specified to order by '" + order + "'. Check documentation for details.");
                     }
                     if (!parts[1].equals("d") && !parts[1].equals("a")) {
-                        throw new BadRequestException(errorResponse("Order direction must be 'a' (asc) or 'd' (desc)."));
+                        throw new RuntimeException("Order direction must be 'a' (asc) or 'd' (desc).");
                     }
                 } else {
-                    throw new BadRequestException(errorResponse("Order parameter has invalid format '" + order + "'. Check documentation for details."));
+                    throw new RuntimeException("Order parameter has invalid format '" + order + "'. Check documentation for details.");
                 }
             }
         }
@@ -63,15 +61,15 @@ public class OptionValidator {
                 String[] parts = filter.split(",");
 
                 if (!EXPECTED_FIELDS.contains(parts[0])) {
-                    throw new BadRequestException(errorResponse("Unexpected field '" + parts[0] + "' specified in filter '" + filter + "'. Check documentation for details."));
+                    throw new RuntimeException("Unexpected field '" + parts[0] + "' specified in filter '" + filter + "'. Check documentation for details.");
                 }
 
                 if (!EXPECTED_ACTIONS.contains(parts[1])) {
-                    throw new BadRequestException(errorResponse("Unexpected action '" + parts[0] + "' specified in filter '" + filter + "'. Check documentation for details."));
+                    throw new RuntimeException("Unexpected action '" + parts[0] + "' specified in filter '" + filter + "'. Check documentation for details.");
                 }
 
                 if (parts.length != 3) {
-                    throw new BadRequestException(errorResponse("Filter parameter has invalid format '" + filter + "'. Check documentation for details."));
+                    throw new RuntimeException("Filter parameter has invalid format '" + filter + "'. Check documentation for details.");
                 }
 
                 processFieldsInFilters(parts);
@@ -86,32 +84,32 @@ public class OptionValidator {
                     try {
                         parseInt(parts[2]);
                     } catch (NumberFormatException e) {
-                        throw new BadRequestException(errorResponse("Field '" + field.getName() + "' in filter must be integer"));
+                        throw new RuntimeException("Field '" + field.getName() + "' in filter must be integer");
                     }
                 } else if (BigDecimal.class.equals(field.getType())) {
                     try {
                         new BigDecimal(parts[2]);
                     } catch (NumberFormatException e) {
-                        throw new BadRequestException(errorResponse("Field '" + field.getName() + "' in filter must be float"));
+                        throw new RuntimeException("Field '" + field.getName() + "' in filter must be float");
                     }
                 } else if (Long.class.equals(field.getType())) {
                     try {
                         parseLong(parts[2]);
                     } catch (NumberFormatException e) {
-                        throw new BadRequestException(errorResponse("Field '" + field.getName() + "' in filter must be long"));
+                        throw new RuntimeException("Field '" + field.getName() + "' in filter must be long");
                     }
                 } else if (MusicGenre.class.equals(field.getType())) {
                     try {
                         MusicGenre.valueOf(parts[2]);
                     } catch (IllegalArgumentException e) {
-                        throw new BadRequestException(errorResponse("Field '" + field.getName() + "' in filter must be one of expected value. Check documentation for details"));
+                        throw new RuntimeException("Field '" + field.getName() + "' in filter must be one of expected value. Check documentation for details");
                     }
                 } else if (LocalDate.class.equals(field.getType())) {
                     try {
                         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
                         formatter.parse(parts[2]);
                     } catch (ParseException e) {
-                        throw new BadRequestException(errorResponse("Field '" + field.getName() + "' in filter must have format yyyy-MM-dd"));
+                        throw new RuntimeException("Field '" + field.getName() + "' in filter must have format yyyy-MM-dd");
                     }
                 }
             }

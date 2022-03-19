@@ -45,69 +45,79 @@
                     }
                 }
 
+                let orders = []
+                let filters = []
+
                 console.log(filterInfo.orderBy1)
                 console.log(filterInfo.orderDirection1)
 
                 if (filterInfo.orderBy1 && filterInfo.orderDirection1) {
-                    params.push('order=' + filterInfo.orderBy1 + ',' + filterInfo.orderDirection1)
+                    orders.push('' + filterInfo.orderBy1 + ',' + filterInfo.orderDirection1)
                 }
                 if (filterInfo.orderBy2 && filterInfo.orderDirection2) {
-                    params.push('order=' + filterInfo.orderBy2 + ',' + filterInfo.orderDirection2)
+                    orders.push('' + filterInfo.orderBy2 + ',' + filterInfo.orderDirection2)
                 }
                 if (filterInfo.orderBy3 && filterInfo.orderDirection3) {
-                    params.push('order=' + filterInfo.orderBy3 + ',' + filterInfo.orderDirection3)
+                    orders.push('' + filterInfo.orderBy3 + ',' + filterInfo.orderDirection3)
                 }
                 if (filterInfo.orderBy4 && filterInfo.orderDirection4) {
-                    params.push('order=' + filterInfo.orderBy4 + ',' + filterInfo.orderDirection4)
+                    orders.push('' + filterInfo.orderBy4 + ',' + filterInfo.orderDirection4)
                 }
                 if (filterInfo.orderBy5 && filterInfo.orderDirection5) {
-                    params.push('order=' + filterInfo.orderBy5 + ',' + filterInfo.orderDirection5)
+                    orders.push('' + filterInfo.orderBy5 + ',' + filterInfo.orderDirection5)
                 }
                 if (filterInfo.orderBy6 && filterInfo.orderDirection6) {
-                    params.push('order=' + filterInfo.orderBy6 + ',' + filterInfo.orderDirection6)
+                    orders.push('' + filterInfo.orderBy6 + ',' + filterInfo.orderDirection6)
                 }
                 if (filterInfo.orderBy7 && filterInfo.orderDirection7) {
-                    params.push('order=' + filterInfo.orderBy7 + ',' + filterInfo.orderDirection7)
+                    orders.push('' + filterInfo.orderBy7 + ',' + filterInfo.orderDirection7)
                 }
                 if (filterInfo.orderBy8 && filterInfo.orderDirection8) {
-                    params.push('order=' + filterInfo.orderBy8 + ',' + filterInfo.orderDirection8)
+                    orders.push('' + filterInfo.orderBy8 + ',' + filterInfo.orderDirection8)
                 }
                 if (filterInfo.orderBy9 && filterInfo.orderDirection9) {
-                    params.push('order=' + filterInfo.orderBy9 + ',' + filterInfo.orderDirection9)
+                    orders.push('' + filterInfo.orderBy9 + ',' + filterInfo.orderDirection9)
                 }
 
                 if (filterInfo.filterById) {
-                    params.push('filter=id,==,' + filterInfo.filterById)
+                    filters.push('id,==,' + filterInfo.filterById)
                 }
                 if (filterInfo.filterByName) {
-                    params.push('filter=name,contains,' + filterInfo.filterByName)
+                    filters.push('name,contains,' + filterInfo.filterByName)
                 }
                 if (filterInfo.filterByX && filterInfo.filterByXAction) {
-                    params.push('filter=x,' + filterInfo.filterByXAction + ',' + filterInfo.filterByX)
+                    filters.push('x,' + filterInfo.filterByXAction + ',' + filterInfo.filterByX)
                 }
                 if (filterInfo.filterByY && filterInfo.filterByYAction) {
-                    params.push('filter=y,' + filterInfo.filterByYAction + ',' + filterInfo.filterByY)
+                    filters.push('y,' + filterInfo.filterByYAction + ',' + filterInfo.filterByY)
                 }
                 if (filterInfo.filterByCreationDate && filterInfo.filterByCreationDateAction) {
-                    params.push('filter=creationDate,' + filterInfo.filterByCreationDateAction + ',' + filterInfo.filterByCreationDate)
+                    filters.push('creationDate,' + filterInfo.filterByCreationDateAction + ',' + filterInfo.filterByCreationDate)
                 }
                 if (filterInfo.filterByNumberOfParticipants && filterInfo.filterByNumberOfParticipantsAction) {
-                    params.push('filter=numberOfParticipants,' + filterInfo.filterByNumberOfParticipantsAction + ',' + filterInfo.filterByNumberOfParticipants)
+                    filters.push('numberOfParticipants,' + filterInfo.filterByNumberOfParticipantsAction + ',' + filterInfo.filterByNumberOfParticipants)
                 }
                 if (filterInfo.filterByAlbumsCount && filterInfo.filterByAlbumsCountAction) {
-                    params.push('filter=albumsCount,' + filterInfo.filterByAlbumsCountAction + ',' + filterInfo.filterByAlbumsCount)
+                    filters.push('albumsCount,' + filterInfo.filterByAlbumsCountAction + ',' + filterInfo.filterByAlbumsCount)
                 }
                 if (filterInfo.filterByGenre) {
-                    params.push('filter=genre,==,' + filterInfo.filterByGenre)
+                    filters.push('genre,==,' + filterInfo.filterByGenre)
                 }
                 if (filterInfo.labelName) {
-                    params.push('filter=labelName,contains,' + filterInfo.filterByLabelName)
+                    filters.push('labelName,contains,' + filterInfo.filterByLabelName)
+                }
+
+                if (orders) {
+                    params.push('order=' + orders.join(';'))
+                }
+                if (filters) {
+                    params.push('filter=' + filters.join(';'))
                 }
 
                 params = params.join('&')
 
                 this.$http.get(
-                    '/v1/api/band?' + params
+                    'http://localhost:8082/api/band?' + params
                 ).then(
                     (response) => {
                         this.bands = response.body;
@@ -123,7 +133,7 @@
             },
             deleteBand: function (band) {
                 this.$http.delete(
-                    '/v1/api/band/' + band.id
+                    'http://localhost:8082/api/band/' + band.id
                 ).then(
                     (response) => {
                         this.bands.splice(this.bands.indexOf(band), 1);
@@ -135,9 +145,13 @@
             },
             addBand: function (band) {
                 if (band.id) {
+                    let headers = {
+                        'Content-Type': 'text/plain;charset=utf-8'
+                    };
                     this.$http.put(
-                        '/v1/api/band',
-                        band
+                        'http://localhost:8082/api/band',
+                        JSON.stringify(band),
+                        {headers}
                     ).then(
                         (response) => {
                             for (let i in this.bands) {
@@ -153,9 +167,13 @@
                         }
                     );
                 } else {
+                    let headers = {
+                        'Content-Type': 'text/plain;charset=utf-8'
+                    };
                     this.$http.post(
-                        '/v1/api/band',
-                        band
+                        'http://localhost:8082/api/band',
+                        JSON.stringify(band),
+                        {headers}
                     ).then(
                         (response) => {
                             this.bands.push(response.body);
@@ -172,7 +190,7 @@
             },
             calcAvrg: function () {
                 this.$http.get(
-                    '/v1/api/band/count_by/number_of_participants',
+                    'http://localhost:8082/api/count_by/number_of_participants',
                 ).then(
                     (response) => {
                         this.groupby = response.body
@@ -185,7 +203,7 @@
         },
         created: function() {
             this.$http.get(
-                '/v1/api/band',
+                'http://localhost:8082/api/band',
                 {
                 }
             ).then(

@@ -1,5 +1,7 @@
 package itmo.gorshkov.entity;
 
+import itmo.gorshkov.LocalDateAdapter;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -12,6 +14,9 @@ import javax.validation.constraints.AssertTrue;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.adapters.XmlJavaTypeAdapter;
 import java.io.Serializable;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -21,6 +26,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "MUSIC_BAND")
+@XmlAccessorType(XmlAccessType.FIELD)
 public class MusicBand implements Serializable {
     private static final long serialVersionUID = -2407173236798550497L;
     @Id
@@ -33,6 +39,7 @@ public class MusicBand implements Serializable {
     private BigDecimal y; //Значение поля должно быть больше -320
     @Column(name = "CREATION_DATE")
     @NotNull(message = "creationDate must present")
+    @XmlJavaTypeAdapter(value = LocalDateAdapter.class)
     private java.time.LocalDate creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
     @Min(value = 1, message = "numberOfParticipants must be greater than 0")
     @NotNull(message = "numberOfParticipants must present")
